@@ -21,7 +21,6 @@ interface Props {
     className?: string;
 }
 
-
 const FirebaseAuth = ({uiConfig, firebaseAuth, className, uiCallback}: Props) => {
     const [firebaseui, setFirebaseui] = useState<typeof import('firebaseui') | null>(null);
     const [userSignedIn, setUserSignedIn] = useState(false);
@@ -34,7 +33,6 @@ const FirebaseAuth = ({uiConfig, firebaseAuth, className, uiCallback}: Props) =>
         // the component has mounted, so that this works when doing server-side rendering.
         setFirebaseui(await import('firebaseui'));
     }, []);
-
 
     useEffect(() => {
         if (firebaseui === null )
@@ -50,7 +48,7 @@ const FirebaseAuth = ({uiConfig, firebaseAuth, className, uiCallback}: Props) =>
             if (!user && userSignedIn)
                 firebaseUiWidget.reset();
             if( user && user.providerData?.[0]?.providerId === EmailAuthProvider.PROVIDER_ID && !user.emailVerified ) {
-                sendEmailVerification(user).then(() => console.log('Email verification sent!'));
+                sendEmailVerification(user).then(() => console.log('FirebaseAuth: Email verification sent!'));
                 firebaseUiWidget.reset();
             }
             setIsVerified(!!user?.emailVerified);

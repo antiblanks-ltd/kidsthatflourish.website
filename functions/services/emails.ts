@@ -6,41 +6,37 @@ import Welcome from '../emails/templates/welcome';
 import {db} from './db';
 import {CreateEmailResponse} from 'resend/build/src/emails/interfaces';
 
-
 interface ErrorResponse {
     statusCode: number;
     name: string;
     message: string;
 }
+
 type ResendResponse = CreateEmailResponse | ErrorResponse;
 
-
 export const sendEmail = async (options: CreateEmailOptions) => {
-    console.log(`sendEmail: ${options}`);
+    console.log(`Emails: Sending email with options: ${options}`);
     const resend = new Resend(process.env.RESEND_API_KEY!);
     const data = await resend.sendEmail(options) as ResendResponse;
-    console.log('Data after sending:', data);
-
+    console.log('Emails: Data after sending:', data);
     if ('statusCode' in data && data.statusCode !== 200)
         throw new Error(`Failed to send email ${data.statusCode}: ${data.message}`);
-
     return data;
 };
-
 
 export const setupWelcomeSequence = async (userId: string) => {
     const user = await getAuth().getUser(userId);
     if (!user.email)
-        return console.log('No email for user:', userId);
+        return console.log('Emails: No email for user:', userId);
 
     // Do not send if the user is authenticated with email/password and hasn't verified their email
     if (!user.emailVerified && user.providerData.some((p) => p.providerId === 'password'))
-        return console.log('User has not verified their email:', userId, user.email);
+        return console.log('Emails: User has not verified their email:', userId, user.email);
 
     const nameParts = user.displayName?.trim()?.split(/\s+/) ?? [];
     const firstName = nameParts.length > 0 ? nameParts[0] : '';
     const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-    console.log(`Sending to: ${userId} ${user.email} with data: ${firstName} || ${lastName}`);
+    console.log(`Emails: Sending to: ${userId} ${user.email} with data: ${firstName} || ${lastName}`);
 
     // 1. Welcome email
     const fiveMinutesFromNow = new Date();
@@ -57,22 +53,20 @@ export const setupWelcomeSequence = async (userId: string) => {
         },
         sendAt: Timestamp.fromDate(fiveMinutesFromNow),
     });
-
-    // 2. TODO
 };
 
 
 export const sendScheduledEmails = async (retries: number = 10) => {
-    console.log('sendScheduledEmails');
+    console.log('Emails: Sending scheduled emails');
     const toSend = await db.emailQueue.where(
         'sendAt', '<=', Timestamp.fromDate(new Date())
     ).get();
 
-    console.log(`sending ${toSend.docs.length} emails`);
+    console.log(`Emails: Sending ${toSend.docs.length} emails`);
     const failed: string[] = [];
     await Promise.all(toSend.docs.map(async (d) => {
         const email = d.data();
-        console.log('email', email);
+        console.log('Emails: Sending to email:', email);
 
         // Determine the template to use
         let EmailObject = null;
@@ -80,7 +74,7 @@ export const sendScheduledEmails = async (retries: number = 10) => {
             EmailObject = Welcome;
 
         if (!EmailObject)
-            return console.log('Unknown template:', email.template);
+            return console.log('Emails: Unknown template:', email.template);
 
         try {
             await sendEmail({
@@ -91,7 +85,7 @@ export const sendScheduledEmails = async (retries: number = 10) => {
             });
         }
         catch (e) {
-            console.error('Failed to send email => not removing from queue:', e);
+            console.error('Emails: Failed to send email, not removing from queue:', e);
             failed.push(d.id);
             return;
         }
@@ -101,7 +95,7 @@ export const sendScheduledEmails = async (retries: number = 10) => {
     }));
 
     if (failed.length > 0 && retries > 0) {
-        console.log('Retrying failed emails:', failed);
+        console.log('Emails: Retrying failed emails:', failed);
         await sendScheduledEmails(retries - 1);
     }
 };

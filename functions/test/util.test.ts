@@ -2,7 +2,6 @@ import {expect} from '@jest/globals';
 import {codeToFiles, localize} from '../services/util';
 import {mockFirebase} from './firebaseMocks';
 
-
 beforeAll(() => mockFirebase());
 
 describe('TestCodeToFiles', () => {
@@ -32,7 +31,6 @@ describe('TestCodeToFiles', () => {
         });
     });
 });
-
 
 describe('Test Localization', function () {
     it('Should localize properly', () => {

@@ -12,7 +12,7 @@ class ErrorBoundary extends Component<{children?: ReactNode}, { error: Error | n
     }
 
     static getDerivedStateFromError(error: Error) {
-        console.log('getDerivedStateFromError:', error);
+        console.log('ErrorBoundary: Getting derived state from error:', error);
         return {error: error};
     }
 

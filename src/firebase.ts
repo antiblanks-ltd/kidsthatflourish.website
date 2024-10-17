@@ -16,14 +16,13 @@ const prodConfig = {
 
 const app = !getApps().length ? initializeApp(prodConfig) : getApp();
 export const firestore = initializeFirestore(app, {ignoreUndefinedProperties: true});
-console.log('reconfigured the db to ignore undefined values', firestore.type);
-
+console.log('Firebase: Reconfigured the db to ignore undefined values', firestore.type);
 
 // If we're on the client-side
 if (app.name && typeof window !== 'undefined') {
     const perf = initializePerformance(app);
-    console.log('perf enabled:', perf.dataCollectionEnabled);
+    console.log('Firebase: Performance enabled:', perf.dataCollectionEnabled);
 
     const analytics = initializeAnalytics(app);
-    console.log('analytics:', analytics);
+    console.log('Firebase: Analytics enabled:', analytics);
 }

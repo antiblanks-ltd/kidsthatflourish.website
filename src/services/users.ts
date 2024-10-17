@@ -4,15 +4,13 @@ import {getAuth, updateProfile} from 'firebase/auth';
 import {db} from "./db";
 import {UserInfo} from "models/users";
 
-
 export const onUserInfoChanged = (userId: string, onChanged: (user: UserInfo | null) => void) => {
     return onSnapshot(db.user(userId), snapshot => {
         const user = snapshot.data();
-        console.log('Got user info:', user);
+        console.log('Users: Received user info change:', user);
         onChanged(user ?? null);
     });
 }
-
 
 export const updateUserInfo = async (userId: string, displayName?: string, imageUrl?: string) => {
     const user = getAuth().currentUser;
@@ -27,7 +25,7 @@ export const updateUserInfo = async (userId: string, displayName?: string, image
     // Immediate update only if needed (updates are more expensive than reads)
     const userInfo = (await getDoc(db.user(userId))).data();
     if( userInfo?.displayName !== displayName || (imageUrl && userInfo?.imageUrl !== imageUrl) ) {
-        console.log(`Setting ${userId} info to ${displayName} ${imageUrl}`);
+        console.log(`Users: Setting ${userId} info to ${displayName} ${imageUrl}`);
         await setDoc(db.user(userId), {displayName: displayName, imageUrl: imageUrl}, {merge: true});
     }
 }
