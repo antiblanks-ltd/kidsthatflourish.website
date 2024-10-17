@@ -14,7 +14,7 @@ function AuthProvider({defaultUser, children}: { defaultUser: AuthUser | null, c
     const [user, setUser] = useState<AuthUser | null>(defaultUser);
 
     const handleIdTokenChanged = useCallback(async (firebaseUser: FirebaseUser | null) => {
-        console.log('token changed:', firebaseUser);
+        console.log('AuthProvider: Token changed:', firebaseUser);
         if (firebaseUser && firebaseUser.uid === user?.id && firebaseUser.emailVerified === user?.emailVerified)
             return;
 
@@ -23,21 +23,21 @@ function AuthProvider({defaultUser, children}: { defaultUser: AuthUser | null, c
             return setUser(currentUser => {
                 if (!currentUser)
                     return null;
-                console.log('logging out...');
+                console.log('AuthProvider: Logging out...');
                 fetch('/api/logout', {method: 'GET'})
-                    .then(() => console.log('logged out'))
+                    .then(() => console.log('AuthProvider: Logged out'))
                     .then(() => router.refresh());
                 return null;
             });
         }
 
-        console.log(`Setting the user... ${user?.id} -> ${firebaseUser.uid}`);
+        console.log(`AuthProvider: Setting the user: ${user?.id} -> ${firebaseUser.uid}`);
         const tokenResult = await firebaseUser.getIdTokenResult();
-        console.log('tokenResult:', tokenResult);
+        console.log('AuthProvider: Received token result:', tokenResult);
         const login = await fetch('/api/login', {method: 'GET', headers: {Authorization: `Bearer ${tokenResult.token}`}});
-        console.log(`login: ${login.status} ${login.statusText} ${await login.text()}`);
+        console.log(`AuthProvider: Login response: ${login.status} ${login.statusText} ${await login.text()}`);
         if (login.status !== 200) {
-            console.error('Failed to log in... Logging out instead');
+            console.error('AuthProvider: Failed to log in, logging out instead...');
             await getAuth().signOut();
             await fetch('/api/logout', {method: 'GET'});
             return router.refresh();
@@ -45,7 +45,7 @@ function AuthProvider({defaultUser, children}: { defaultUser: AuthUser | null, c
 
         // Update the current user
         const providerData = firebaseUser.providerData && firebaseUser.providerData[0];
-        console.log('providerData:', providerData);
+        console.log('AuthProvider: Updating user with provider data:', providerData);
         setUser({
             id: firebaseUser.uid,
             displayName: firebaseUser.displayName || providerData?.displayName || firebaseUser.email || null,
@@ -57,7 +57,7 @@ function AuthProvider({defaultUser, children}: { defaultUser: AuthUser | null, c
             phoneNumber: firebaseUser.phoneNumber || null,
         });
 
-        console.log('Updating the page...');
+        console.log('AuthProvider: Updating the page...');
         router.refresh();
     }, [router, user?.emailVerified, user?.id]);
 
@@ -79,7 +79,7 @@ function AuthProvider({defaultUser, children}: { defaultUser: AuthUser | null, c
         user && user.signInProvider &&
         (user.emailVerified || (user.signInProvider !== EmailAuthProvider.PROVIDER_ID && user.signInProvider !== 'custom'))
     );
-    // console.log('isVerified:', isVerified, user?.emailVerified, user?.signInProvider);
+    console.log('AuthProvider: User is verified:', isVerified, user?.emailVerified, user?.signInProvider);
 
     return <>
         <AuthContext.Provider value={{

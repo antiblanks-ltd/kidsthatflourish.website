@@ -8,11 +8,11 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 
-
 // Schema for user profile:
 const schema = object({
     displayName: string().min(3).max(30),
 });
+
 type Schema = Infer<typeof schema>;
 
 function ProfileEditorForm({user, stopEditing}: {
@@ -28,16 +28,16 @@ function ProfileEditorForm({user, stopEditing}: {
     });
     const {handleSubmit, control, formState: {errors}, reset} = formMethods;
     useEffect(() => reset(getDefaultFieldValues()), [getDefaultFieldValues, reset]);
-    errors && Object.keys(errors).length && console.log('level errors:', errors);
+    errors && Object.keys(errors).length && console.log('ProfileEditorForm: Level errors:', errors);
 
     // Submit and Cancel
     const onSubmit = async (data: Schema) => {
         await updateUserInfo(user.id, data.displayName);
-        console.log('submitting', data);
+        console.log('ProfileEditorForm: Submitting', data);
         stopEditing();
     };
     const onCancel = () => {
-        console.log('cancelling...');
+        console.log('ProfileEditorForm: Cancelling...');
         stopEditing();
     }
 

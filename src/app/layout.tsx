@@ -14,7 +14,6 @@ import '@/app/globals.css';
 import AuthProvider from "@/auth/AuthProvider";
 import {getUser} from "@/auth/getUser";
 
-
 const title = 'Next.js + Firebase + MUI Starter';
 const description = 'A starter template for Next.js + Firebase + MUI projects';
 
@@ -33,12 +32,11 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-
 export default async function RootLayout({children}: {
     children: ReactNode,
 }) {
     const defaultUser = await getUser(cookies());
-    console.log('layout default user:', defaultUser?.id);
+    console.log('Layout: Displaying layout default user:', defaultUser?.id);
 
     return <>
         <html lang="en">

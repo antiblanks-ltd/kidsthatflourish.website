@@ -1,7 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {authentication} from "next-firebase-auth-edge/lib/next/middleware";
 
-
 const commonOptions = {
     loginPath: '/api/login',
     logoutPath: '/api/logout',
@@ -24,7 +23,6 @@ const commonOptions = {
     },
 };
 
-
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
@@ -40,23 +38,23 @@ export async function middleware(request: NextRequest) {
         '/vercel.svg',
     ].includes(pathname))
         return;
-    console.log('pathname:', pathname);
+    console.log('Middleware: Processing pathname:', pathname);
 
     // Handle authentication
     if ([commonOptions.loginPath, commonOptions.logoutPath].includes(pathname)) {
-        console.log('handling auth:', pathname);
+        console.log('Middleware: Handling auth at pathname:', pathname);
         return authentication(request, {
             ...commonOptions,
             handleValidToken: async ({ token, decodedToken }) => {
-                console.log('Successfully authenticated', { token, decodedToken });
+                console.log('Middleware: Successfully authenticated', { token, decodedToken });
                 return NextResponse.next();
             },
             handleInvalidToken: async () => {
-                console.log('Not authenticated or token expired');
+                console.log('Middleware: Not authenticated or token expired');
                 return NextResponse.next();
             },
             handleError: async (error) => {
-                console.error('Oops, this should not have happened.', { error });
+                console.error('Middleware: Oops, this should not have happened.', { error });
                 return NextResponse.next();
             },
         });
